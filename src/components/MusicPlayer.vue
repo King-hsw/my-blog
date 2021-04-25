@@ -5,11 +5,15 @@
          :style="musicImgStyle">
     </div>
     <div class="music-controller">
-      <!--歌名 后退 快进 播放 播放菜单-->
-      <div>
+      <!--歌名 后退 播放 快进  播放菜单-->
+      <div class="first-line">
         <span>歌名</span>
         <span>作者</span>
+        <span>后退</span>
+        <div :style="isPlayStyle" @click="playOrPause"/>
+        <span>快进</span>
       </div>
+
       <!--进度条 时间显示 音量 播放顺序 循环模式 歌词显示-->
       <div>
         <!--进度条-->
@@ -36,6 +40,7 @@
     </div>
     <div class="music-zoom">></div>
     <button @click="getTime"></button>
+    <button @click="playMusic"></button>
   </div>
 </template>
 
@@ -44,6 +49,8 @@
     name: "MusicPlayer",
     data() {
       return {
+        // 是否播放
+        isPlay: false,
         audio: "",
         musicInfo: {
           pic: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
@@ -66,17 +73,40 @@
       this.audio.addEventListener("error", () => {
         return 0
       }, false);
-      this.audio.src = "https://m10.music.126.net/20210425182217/1defe38b449031699bf1ca00c9cc9219/yyaac/obj/wonDkMOGw6XDiTHCmMOi/2933456556/1d0c/0d86/c44a/254777dbb0e1b6334adfb36a8c7ed0f1.m4a"
-      this.audio.autoplay = true;
-      this.audio.play();
-
+      this.audio.src = "http://101.133.141.41/su.flac"
     },
     computed: {
       musicImgStyle() {
         return 'background-image:url("' + this.musicInfo.pic + '")'
+      },
+      isPlayStyle() {
+        let pic = this.$store.state.ip
+        if (!this.isPlay) {
+          pic += 'play.svg'
+        } else {
+          pic += 'pause.svg'
+        }
+        return 'background-image:url("' + pic + '")'
       }
     },
     methods: {
+      playOrPause() {
+        if (this.isPlay) {
+          this.audio.pause()
+          this.isPlay = false
+          return
+        }
+        this.audio.play()
+        this.isPlay = true
+      },
+
+
+      pause() {
+        this.audio.pause();
+      },
+      playMusic() {
+        this.audio.play();
+      },
       /**
        * 获取音乐总时长
        */
@@ -126,6 +156,13 @@
 </script>
 
 <style scoped>
+  .first-line > div {
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+  }
+
+
   .music-palyer {
     height: 66px;
     display: flex;
@@ -140,6 +177,11 @@
   .music-controller {
     background-color: #ffffff;
   }
+
+  .first-line {
+    display: flex;
+  }
+
 
   .music-zoom {
     background-color: #e6e6e6;

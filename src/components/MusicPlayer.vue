@@ -1,7 +1,7 @@
 <template>
   <div class="music-palyer">
     <!--当前歌曲的图片-->
-    <div class="music-img"
+    <div class="music-img "
          :style="musicImgStyle">
     </div>
     <div class="music-controller">
@@ -10,7 +10,12 @@
         <span>歌名</span>
         <span>作者</span>
         <span>后退</span>
-        <div :style="isPlayStyle" @click="playOrPause"/>
+        <svg-icon
+            :icon-name="isPlayStyle"
+            :style="'cursor: pointer;;fill:'+iconColor"
+            @click="playOrPause"
+            @mouseenter="changeIconColor('#5b5b5b')"
+            @mouseleave="changeIconColor('#adadad')"/>
         <span>快进</span>
       </div>
 
@@ -45,16 +50,23 @@
 </template>
 
 <script>
+  import SvgIcon from "./SvgIcon";
+
   export default {
     name: "MusicPlayer",
+    components: {SvgIcon},
     data() {
       return {
+        //图标的颜色
+        iconColor: '#adadad',
         // 是否播放
         isPlay: false,
         audio: "",
-        musicInfo: {
-          pic: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
-        },
+        musicInfo:
+            {
+              pic: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
+            }
+        ,
       }
     },
     created() {
@@ -80,16 +92,17 @@
         return 'background-image:url("' + this.musicInfo.pic + '")'
       },
       isPlayStyle() {
-        let pic = this.$store.state.ip
         if (!this.isPlay) {
-          pic += 'play.svg'
+          return 'play'
         } else {
-          pic += 'pause.svg'
+          return 'pause'
         }
-        return 'background-image:url("' + pic + '")'
-      }
+      },
     },
     methods: {
+      changeIconColor(color) {
+        this.iconColor = color
+      },
       playOrPause() {
         if (this.isPlay) {
           this.audio.pause()
@@ -160,6 +173,11 @@
     width: 20px;
     height: 20px;
     background-size: cover;
+    transition: background-position 0.1s;
+  }
+
+  .first-line > div:hover {
+    background-image: url("http://101.133.141.41/pause");
   }
 
 
@@ -189,5 +207,6 @@
     height: 66px;
     font-size: 20px;
     color: #919191;
+
   }
 </style>

@@ -1,16 +1,21 @@
 <template>
   <div id="sidebar" :class="animationStyle">
     <main-menu/>
-    <div id="level2-menu"> 大猪</div>
+    <div id="level2-menu">
+      <music-player/>
+    </div>
   </div>
 </template>
 
 <script>
   import MainMenu from "../menu/MainMenu";
+  import MusicPlayer from "../../components/MusicPlayer";
+
   export default {
     name: "Sidebar",
-    components:{
-      MainMenu
+    components: {
+      MainMenu,
+      MusicPlayer
     },
     props: {
       animationStyle: {
@@ -28,7 +33,7 @@
   }
 
 
-  #level2-menu{
+  #level2-menu {
     background-color: aqua;
     width: 100%;
   }

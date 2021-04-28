@@ -2,7 +2,6 @@
   <div id="sidebar" :class="animationStyle">
     <main-menu/>
     <div id="level2-menu">
-      <music-player/>
     </div>
   </div>
 </template>

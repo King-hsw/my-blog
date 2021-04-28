@@ -47,15 +47,15 @@
       <div class="second-line">
         <!--进度条-->
         <div class="progress-bar">
-
+            <input type="range" min="0" :max="max" @input="getVal">
         </div>
         <!--时间显示-->
         <div class="music-time">
           <!--当前播放时刻-->
-          <span>00:21</span>
+          <span>{{ newTime }}</span>
           <span>/</span>
           <!--当前歌曲总时长-->
-          <span></span>
+          <span>{{ time }}</span>
         </div>
         <!--音量-->
         <div>
@@ -87,7 +87,15 @@
       </div>
     </div>
     <div class="music-expand" @click="changeExpand">{{ isExpandStyle }}</div>
-    <div class="play-list" ref="playList"></div>
+    <div class="play-list" ref="playList">
+      <ul style="list-style: none">
+        <li>你好</li>
+        <li>你好</li>
+        <li>你好</li>
+        <li>你好</li>
+        <li>你好</li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -101,12 +109,15 @@
       expand: {
         default: true
       },
-      openPlayList: {
-        default: false
-      }
     },
     data() {
       return {
+        max: 0,
+        // 当前音乐播放进度的时间戳
+        numb: 0,
+        time: "00:00",
+        //  格式化后的当前音乐播放进度的时间
+        newTime: "00:00",
         //当前循环模式
         currentLoopMode: 'loopNone',
         //循环模式
@@ -116,7 +127,7 @@
         // 是否播放
         isPlay: false,
         isExpand: this.expand,
-        isOpenPlayList: this.openPlayList,
+        isOpenPlayList: false,
         audio: "",
         musicInfo: {
           pic: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
@@ -125,22 +136,18 @@
       }
     },
     created() {
-      // this.audio=document.getElementById('music')
+      // 创建<audio>元素
       this.audio = document.createElement("audio");
       let that = this;
-      this.audio.addEventListener("canplay", () => {
-        return 0
-      }, false),
-          this.audio.addEventListener("timeupdate", () => {
-            return 0
-          }, false);
+      this.audio.addEventListener("canplay", that.mCanplay, false),
+          this.audio.addEventListener("timeupdate", that.mTimeUpdate, false);
       this.audio.addEventListener("ended", () => {
         return 0
       }, false);
       this.audio.addEventListener("error", () => {
         return 0
       }, false);
-      this.audio.src = "http://101.133.141.41/su.flac"
+      this.audio.src = "https://m10.music.126.net/20210428155004/9e177ed408155cf2f20e097ee36c211c/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/3791110844/4740/ae26/e2da/413218e2fed926245dd7718fee29b8b8.mp3"
     },
     computed: {
       musicImgStyle() {
@@ -162,9 +169,44 @@
       }
     },
     methods: {
+      // 调整音乐进度
+      getVal() {
+        if (!this.audio.paused || this.audio.currentTime != 0) {
+          this.audio.currentTime = this.numb;
+          if (this.numb == Math.floor(this.max)) {
+            this.audio.pause();
+            this.isPlay = false;
+          }
+        }
+      },
+      // 用于监听播放音乐器加载状态
+      mCanplay() {
+        this.canplay = true;
+        if (this.loading) {
+          this.audio.play(); // 播放
+          this.isPlay = true;
+        }
+        this.getTime();
+      },
+      // 用于监听歌曲播放进度
+      mTimeUpdate() {
+        this.numb = this.audio.currentTime;
+        this.newTime = this.transTime(this.audio.currentTime);
+      },
       changePlayList() {
-        this.$refs.playList.classList.add('drop');
-        console.log( this.$refs.playList.classList)
+        if (this.$refs.playList.classList.contains('drop')) {
+          this.$refs.playList.classList.remove('drop')
+        }
+        if (this.$refs.playList.classList.contains('rise')) {
+          this.$refs.playList.classList.remove('rise')
+        }
+        if (this.isOpenPlayList) {
+          this.$refs.playList.classList.add('drop');
+          this.isOpenPlayList = false;
+        } else {
+          this.$refs.playList.classList.add('rise');
+          this.isOpenPlayList = true;
+        }
       },
       changeExpand() {
         if (this.$refs.musicController.classList.contains('indentation')) {
@@ -176,6 +218,16 @@
         if (this.isExpand) {
           this.$refs.musicController.classList.add('indentation')
           this.isExpand = false;
+          if (this.$refs.playList.classList.contains('drop')) {
+            this.$refs.playList.classList.remove('drop')
+          }
+          if (this.$refs.playList.classList.contains('rise')) {
+            this.$refs.playList.classList.remove('rise')
+          }
+          if (this.isOpenPlayList) {
+            this.$refs.playList.classList.add('drop');
+            this.isOpenPlayList = false;
+          }
         } else {
           this.$refs.musicController.classList.add('spread')
           this.isExpand = true;
@@ -217,22 +269,14 @@
         this.audio.play()
         this.isPlay = true
       },
-
-
-      pause() {
-        this.audio.pause();
-      },
-      playMusic() {
-        this.audio.play();
-      },
       /**
        * 获取音乐总时长
        */
       getTime() {
         let time = this.audio.duration;
-        // this.max = time;
+        this.max = time;
         //总共时长的秒数
-        // this.time = this.transTime(time);
+        this.time = this.transTime(time);
         console.log(this.transTime(time))
       },
       /**
@@ -280,7 +324,7 @@
     height: 66px;
     display: flex;
     /*音乐播放器控制器的宽度*/
-    --music-controller-width: 144px;
+    --music-controller-width: 400px;
     /*音乐图片宽度*/
     --music-img-width: 66px;
     /*播放列表的高度*/
@@ -302,12 +346,27 @@
 
   .play-list {
     width: calc(var(--music-img-width) + var(--music-controller-width));
-    height: var(--play-list-height);
-    background-color: aqua;
+    height: 0;
+    background-color: white;
     position: absolute;
-    top: calc(-1 * var(--play-list-height));
-    margin-bottom: -px;
+    bottom: 65px;
     z-index: 10000;
+    overflow-y: scroll;
+
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
   }
 
 
@@ -321,6 +380,8 @@
   .music-controller {
     background-color: #ffffff;
     width: var(--music-controller-width);
+    white-space: nowrap;
+    overflow-x: hidden;
   }
 
   .music-controller > div {
@@ -344,24 +405,34 @@
 
   @keyframes spread {
     0% {
-      margin-left: calc(-1 * var(--music-controller-width))
+      margin-left: calc(-1 * var(--music-img-width));
+      width: var(--music-img-width);
+
     }
     100% {
-      margin-left: 0px
+      margin-left: calc(-1 * var(--music-img-width));
+      margin-left: 0;
+      width: var(--music-controller-width);
     }
   }
 
   .indentation {
-    animation: indentation 1s;
+    animation: indentation ease-in-out 0.7s;
     animation-fill-mode: forwards;
   }
 
+
   @keyframes indentation {
     0% {
-      margin-left: 0px
+      margin-left: 0;
+      width: var(--music-controller-width);
+    }
+    75% {
+      margin-left: calc(-1 * var(--music-img-width));
     }
     100% {
-      margin-left: calc(-1 * var(--music-controller-width))
+      margin-left: calc(-1 * var(--music-img-width));
+      width: var(--music-img-width);
     }
   }
 
@@ -373,11 +444,25 @@
 
   @keyframes drop {
     from {
+      height: var(--play-list-height);
     }
     to {
-      /*margin-bottom: calc(-1 * var(--play-list-height));*/
+      height: 0;
     }
   }
 
+  .rise {
+    animation: rise 0.7s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes rise {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--play-list-height);
+    }
+  }
 
 </style>

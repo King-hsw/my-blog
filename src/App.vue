@@ -1,12 +1,14 @@
 <template>
-  <container/>
+  <!--<container/>-->
+  <slider/>
 </template>
 
 <script>
   import Container from "./views/container/Container";
+  import Slider from "./components/Slider";
 
   export default {
-    components: {Container},
+    components: {Slider, Container},
     name: "App",
 
   }

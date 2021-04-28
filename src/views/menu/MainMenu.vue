@@ -1,6 +1,6 @@
 <template>
   <div id="main-menu">
-    <el-avatar id="avatar" shape="circle " :size="140" :fit="fit" :src="avatar">nihao</el-avatar>
+    <el-avatar id="avatar" shape="circle" :size="140" :src="avatar">nihao</el-avatar>
     <ul>
       <li>你好</li>
       <li>你好</li>

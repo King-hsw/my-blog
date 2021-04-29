@@ -7,12 +7,13 @@
       <li>你好</li>
       <li>你好</li>
     </ul>
-    <music-player/>
+    <music-player :music-infos="musicInfos"/>
   </div>
 </template>
 
 <script>
   import MusicPlayer from "../../components/MusicPlayer";
+  import MusicInfos from "../../mock/music.json"
 
   export default {
     name: "MainMenu",
@@ -22,7 +23,7 @@
     data() {
       return {
         avatar: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-
+        musicInfos: MusicInfos
       }
     }
   }

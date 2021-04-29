@@ -1,5 +1,5 @@
 <template>
-  <div class="music-palyer">
+  <div class="music-player">
     <!--当前歌曲的图片-->
     <div class="music-img"
          :style="musicImgStyle">
@@ -7,47 +7,51 @@
     <div class="music-controller" ref="musicController">
       <!--歌名 后退 播放 快进  播放菜单-->
       <div class="first-line">
-        <span>歌名</span>
-        <span>作者</span>
+        <span>{{ musicInfo.author }}</span>
+        <span>-{{ musicInfo.name }}</span>
         <!--后退-->
-        <div>
-          <svg-icon icon-name="back"
-                    class-name="svg-icon"
-                    @mouseenter="changeIconColor($event,'#5b5b5b')"
-                    @mouseleave="changeIconColor($event,'#adadad')"/>
-        </div>
-        <!--播放-->
-        <div>
-          <svg-icon
-              :icon-name="isPlayStyle"
-              class-name="svg-icon"
-              @click="playOrPause"
-              @mouseenter="changeIconColor($event,'#5b5b5b')"
-              @mouseleave="changeIconColor($event,'#adadad')"/>
-        </div>
-        <!--快进-->
-        <div>
-          <svg-icon
-              icon-name="forward"
-              class-name="svg-icon"
-              @mouseenter="changeIconColor($event,'#5b5b5b')"
-              @mouseleave="changeIconColor($event,'#adadad')"/>
-        </div>
-        <!--播放列表-->
-        <div>
-          <svg-icon
-              icon-name="playlist"
-              class-name="svg-icon"
-              @click="changePlayList"
-              @mouseenter="changeIconColor($event,'#5b5b5b')"
-              @mouseleave="changeIconColor($event,'#adadad')"/>
+        <div style="display:flex;position: absolute;right: 0">`
+          <div>
+            <svg-icon icon-name="back"
+                      class-name="svg-icon"
+                      @click="backMusic"
+                      @mouseenter="changeIconColor($event,'#5b5b5b')"
+                      @mouseleave="changeIconColor($event,'#adadad')"/>
+          </div>
+          <!--播放-->
+          <div>
+            <svg-icon
+                :icon-name="isPlayStyle"
+                class-name="svg-icon"
+                @click="playOrPause"
+                @mouseenter="changeIconColor($event,'#5b5b5b')"
+                @mouseleave="changeIconColor($event,'#adadad')"/>
+          </div>
+          <!--快进-->
+          <div>
+            <svg-icon
+                icon-name="forward"
+                class-name="svg-icon"
+                @click="forwardMusic"
+                @mouseenter="changeIconColor($event,'#5b5b5b')"
+                @mouseleave="changeIconColor($event,'#adadad')"/>
+          </div>
+          <!--播放列表-->
+          <div>
+            <svg-icon
+                icon-name="playlist"
+                class-name="svg-icon"
+                @click="changePlayList"
+                @mouseenter="changeIconColor($event,'#5b5b5b')"
+                @mouseleave="changeIconColor($event,'#adadad')"/>
+          </div>
         </div>
       </div>
       <!--进度条 时间显示 音量 播放顺序 循环模式 歌词显示-->
       <div class="second-line">
         <!--进度条-->
         <div class="progress-bar">
-            <input type="range" min="0" :max="max" @input="getVal">
+          <slider min="0" :max="max" :value="numb" @change="getVal"/>
         </div>
         <!--时间显示-->
         <div class="music-time">
@@ -88,27 +92,33 @@
     </div>
     <div class="music-expand" @click="changeExpand">{{ isExpandStyle }}</div>
     <div class="play-list" ref="playList">
-      <ul style="list-style: none">
-        <li>你好</li>
-        <li>你好</li>
-        <li>你好</li>
-        <li>你好</li>
-        <li>你好</li>
-      </ul>
+      <ol>
+        <li v-for="(item,index) in musicInfos" @click="changeCurrentMusicInfo(index)"
+            :style="musicInfo.index===index?'background-color:red;':''">
+          {{ index + 1 + '.' + item.name }}
+          <span>{{ item.author }}</span>
+        </li>
+      </ol>
     </div>
   </div>
 </template>
 
 <script>
   import SvgIcon from "./SvgIcon";
+  import Slider from "./Slider";
 
   export default {
     name: "MusicPlayer",
-    components: {SvgIcon},
+    components: {Slider, SvgIcon},
     props: {
+      // 是否展开
       expand: {
         default: true
       },
+      musicInfos: {
+        type: Array,
+        default: []
+      }
     },
     data() {
       return {
@@ -130,7 +140,11 @@
         isOpenPlayList: false,
         audio: "",
         musicInfo: {
-          pic: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
+          pic: this.musicInfos[0].pic,
+          src: this.musicInfos[0].src,
+          name: this.musicInfos[0].name,
+          author: this.musicInfos[0].author,
+          index: 0
         }
         ,
       }
@@ -139,15 +153,13 @@
       // 创建<audio>元素
       this.audio = document.createElement("audio");
       let that = this;
-      this.audio.addEventListener("canplay", that.mCanplay, false),
-          this.audio.addEventListener("timeupdate", that.mTimeUpdate, false);
-      this.audio.addEventListener("ended", () => {
-        return 0
-      }, false);
+      this.audio.addEventListener("canplay", that.mCanplay, false);
+      this.audio.addEventListener("timeupdate", that.mTimeUpdate, false);
+      this.audio.addEventListener("ended", that.mEnded, false);
       this.audio.addEventListener("error", () => {
         return 0
       }, false);
-      this.audio.src = "https://m10.music.126.net/20210428155004/9e177ed408155cf2f20e097ee36c211c/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/3791110844/4740/ae26/e2da/413218e2fed926245dd7718fee29b8b8.mp3"
+      this.audio.src = "https://mp32.9ku.com/upload/128/2018/02/09/875689.mp3"
     },
     computed: {
       musicImgStyle() {
@@ -169,11 +181,54 @@
       }
     },
     methods: {
+      mEnded() {
+        switch (this.currentLoopMode) {
+          case "loopNone":
+            if (this.musicInfo.index + 1 === this.musicInfos.length) {
+              return
+            }
+            this.forwardMusic()
+            break;
+          case "loopOne":
+            this.changeCurrentMusicInfo(this.musicInfo.index)
+            break;
+          case "loopAll":
+            this.forwardMusic()
+            break;
+        }
+      },
+
+
+      backMusic() {
+        if (this.musicInfo.index === 0) {
+          this.changeCurrentMusicInfo(this.musicInfos.length - 1)
+        } else {
+          this.changeCurrentMusicInfo(this.musicInfo.index - 1)
+        }
+      },
+      forwardMusic() {
+        if (this.musicInfo.index + 1 === this.musicInfos.length) {
+          this.changeCurrentMusicInfo(0)
+        } else {
+          this.changeCurrentMusicInfo(this.musicInfo.index + 1)
+        }
+      },
+      changeCurrentMusicInfo(index) {
+        this.musicInfo.pic = this.musicInfos[index].pic
+        this.musicInfo.src = this.musicInfos[index].src
+        this.musicInfo.name = this.musicInfos[index].name
+        this.musicInfo.author = this.musicInfos[index].author
+        this.musicInfo.index = index
+      },
+
       // 调整音乐进度
-      getVal() {
+      getVal(value) {
+        console.log(value)
+        this.numb = value
+        console.log(this.numb)
         if (!this.audio.paused || this.audio.currentTime != 0) {
           this.audio.currentTime = this.numb;
-          if (this.numb == Math.floor(this.max)) {
+          if (this.numb === Math.floor(this.max)) {
             this.audio.pause();
             this.isPlay = false;
           }
@@ -277,7 +332,6 @@
         this.max = time;
         //总共时长的秒数
         this.time = this.transTime(time);
-        console.log(this.transTime(time))
       },
       /**
        * 获取音乐总时长
@@ -319,16 +373,22 @@
 
 <style scoped>
 
-  .music-palyer {
+  .music-player {
     position: absolute;
     height: 66px;
     display: flex;
     /*音乐播放器控制器的宽度*/
-    --music-controller-width: 400px;
+    --music-controller-width: 300px;
     /*音乐图片宽度*/
     --music-img-width: 66px;
     /*播放列表的高度*/
     --play-list-height: 50px;
+  }
+
+  .first-line {
+    margin: 0px 0px 13px 5px;
+    padding: 0px 0px 2px;
+    font-size: 14px;
   }
 
 
@@ -359,14 +419,22 @@
     display: none;
   }
 
-  ul {
+  ol {
     display: block;
-    list-style-type: disc;
     margin-block-start: 0;
     margin-block-end: 0;
     margin-inline-start: 0px;
     margin-inline-end: 0px;
-    padding-inline-start: 40px;
+    padding-inline-start: 0;
+  }
+
+  li {
+    position: relative;
+  }
+
+  li > span {
+    position: absolute;
+    right: 0;
   }
 
 
@@ -382,6 +450,7 @@
     width: var(--music-controller-width);
     white-space: nowrap;
     overflow-x: hidden;
+    position: relative;
   }
 
   .music-controller > div {

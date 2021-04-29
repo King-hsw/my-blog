@@ -1,6 +1,6 @@
 <template>
-  <!--<container/>-->
-  <slider/>
+  <container/>
+  <!--<slider/>-->
 </template>
 
 <script>

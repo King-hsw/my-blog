@@ -2,6 +2,11 @@
   <div id="sidebar" :class="animationStyle">
     <main-menu/>
     <div id="level2-menu">
+      <ul>
+        <li>你好</li>
+        <li>你好</li>
+        <li>你好</li>
+      </ul>
     </div>
   </div>
 </template>
@@ -28,12 +33,10 @@
   #sidebar {
     display: flex;
     min-width: 500px;
-    background-color: red;
   }
 
 
   #level2-menu {
-    background-color: aqua;
     width: 100%;
   }
 </style>

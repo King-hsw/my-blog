@@ -61,18 +61,15 @@
 
   #content-container {
     width: 100%;
-    background-color: yellow;
     /*height: 100%;*/
   }
 
   /*全屏动画效果*/
   @keyframes fullScreen {
     0% {
-      background-color: red;
       min-width: 500px;
     }
     100% {
-      background-color: red;
       margin-left: -500px
     }
   }
@@ -81,12 +78,10 @@
   @keyframes noFullScreen {
     0% {
       margin-left: -500px;
-      background-color: red;
     }
     100% {
       margin-left: 0px;
       min-width: 500px;
-      background-color: red;
     }
   }
 

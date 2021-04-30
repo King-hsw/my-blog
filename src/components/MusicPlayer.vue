@@ -476,10 +476,8 @@
     0% {
       margin-left: calc(-1 * var(--music-img-width));
       width: var(--music-img-width);
-
     }
     100% {
-      margin-left: calc(-1 * var(--music-img-width));
       margin-left: 0;
       width: var(--music-controller-width);
     }
